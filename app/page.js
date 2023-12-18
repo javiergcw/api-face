@@ -10,14 +10,17 @@ const FaceDetection = () => {
   const detectionInterval = useRef(null); // Correctamente declarado como useRef
 
 
+
   useEffect(() => {
-    // Pre-cargar la imagen del sombrero
-
-
     if (isCameraActive) {
-      const displaySize = { width: videoRef.current.offsetWidth, height: videoRef.current.offsetHeight };
-      faceapi.matchDimensions(canvasRef.current, displaySize);
+      handleFaceDetection();
+    } else {
+      stopFaceDetection();
     }
+    // Limpiar al desmontar el componente
+    return () => {
+      stopFaceDetection();
+    };
   }, [isCameraActive]);
 
   const loadModels = async () => {
@@ -29,18 +32,25 @@ const FaceDetection = () => {
     ]);
   };
 
+
   const startVideo = () => {
+    console.log("Solicitando acceso a la cámara...");
     navigator.mediaDevices.getUserMedia({ video: {} })
       .then(stream => {
+        console.log("Acceso a cámara concedido, configurando video...");
         videoRef.current.srcObject = stream;
         videoRef.current.onloadedmetadata = () => {
+          console.log("Metadatos del video cargados, reproduciendo video...");
           videoRef.current.play();
           setIsCameraActive(true);
-          handleFaceDetection(); // Iniciar la detección de rostros automáticamente
         };
       })
-      .catch(err => console.error('Error al acceder a la cámara:', err));
+      .catch(err => {
+        console.error('Error al acceder a la cámara:', err);
+        setIsCameraActive(false);
+      });
   };
+
 
   const stopVideo = () => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -50,21 +60,26 @@ const FaceDetection = () => {
   };
 
   const handleStart = () => {
+    console.log("Cargando modelos...");
     loadModels().then(() => {
+      console.log("Modelos cargados, iniciando video...");
       startVideo();
-      setIsCameraActive(true);
     });
   };
 
   const handleFaceDetection = () => {
-    if (!isCameraActive || videoRef.current.readyState !== 4) return;
-
     if (isDetecting) {
-      // Si ya se está detectando, limpiar el intervalo existente
-      clearInterval(detectionInterval.current);
-    } else {
-      setIsDetecting(true);
+      console.log("La detección de rostros ya está en curso.");
+      return;
     }
+    if (!isCameraActive || videoRef.current.readyState !== 4) {
+      console.log("Cámara no activa o video no listo.");
+      return;
+    }
+
+    setIsDetecting(true);
+    console.log("Iniciando detección de rostros...");
+
     const options = new faceapi.TinyFaceDetectorOptions();
     // Asegúrate de que el canvas tenga el mismo tamaño que el video
     const displaySize = {
@@ -110,9 +125,7 @@ const FaceDetection = () => {
         <>
           <button onClick={stopVideo}>Desactivar Cámara</button>
           <br />
-          <button onClick={isDetecting ? stopFaceDetection : handleFaceDetection}>
-            {isDetecting ? 'Detener Verificación de Rostros' : 'Verificar Rostros'}
-          </button>
+
         </>
       )}
       <video ref={videoRef} autoPlay muted style={{ display: isCameraActive ? 'block' : 'none', position: 'absolute' }} />
