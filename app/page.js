@@ -9,12 +9,10 @@ const FaceDetection = () => {
   const [isDetecting, setIsDetecting] = useState(false);
   const detectionInterval = useRef(null); // Correctamente declarado como useRef
 
-  const hatImg = useRef(new Image());
 
   useEffect(() => {
     // Pre-cargar la imagen del sombrero
-    hatImg.current = new Image();
-    hatImg.current.src = 'black-cowboy-hat-free.png';
+
 
     if (isCameraActive) {
       const displaySize = { width: videoRef.current.offsetWidth, height: videoRef.current.offsetHeight };
