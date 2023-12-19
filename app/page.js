@@ -106,7 +106,7 @@ const FaceDetection = () => {
         // Aquí podrías agregar la lógica para dibujar el sombrero
         // ...
       });
-    }, 100);
+    }, 10);
   };
 
   const stopFaceDetection = () => {
