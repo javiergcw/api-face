@@ -35,7 +35,13 @@ const FaceDetection = () => {
 
   const startVideo = () => {
     console.log("Solicitando acceso a la cámara...");
-    navigator.mediaDevices.getUserMedia({ video: {} })
+    const constraints = {
+      video: {
+        width: { ideal: 1280 },  // O ajustar según el dispositivo
+        height: { ideal: 720 }   // O ajustar según el dispositivo
+      }
+    };
+    navigator.mediaDevices.getUserMedia(constraints)
       .then(stream => {
         console.log("Acceso a cámara concedido, configurando video...");
         videoRef.current.srcObject = stream;
@@ -87,8 +93,9 @@ const FaceDetection = () => {
       height: videoRef.current.videoHeight
     };
     // Ajusta el tamaño del canvas para que coincida con el tamaño del video
-    canvasRef.current.width = displaySize.width;
-    canvasRef.current.height = displaySize.height;
+    canvasRef.current.width = displaySize.width * window.devicePixelRatio;
+    canvasRef.current.height = displaySize.height * window.devicePixelRatio;
+
     faceapi.matchDimensions(canvasRef.current, displaySize);
 
     detectionInterval.current = setInterval(async () => {
@@ -106,7 +113,7 @@ const FaceDetection = () => {
         // Aquí podrías agregar la lógica para dibujar el sombrero
         // ...
       });
-    }, 10);
+    }, 200);
   };
 
   const stopFaceDetection = () => {
@@ -119,6 +126,7 @@ const FaceDetection = () => {
 
   return (
     <div>
+      <h1>version 19 dic</h1>
       {!isCameraActive ? (
         <button onClick={handleStart}>Activar Cámara</button>
       ) : (
